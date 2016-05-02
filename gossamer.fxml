@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:controller="gossamer.GossamerController"
+          xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10"
+        styleClass="root">
+    <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+
+    <Text id="welcome-text"
+          text="Gossamer"
+          GridPane.columnIndex="1"
+          GridPane.rowIndex="0"/>
+
+    <HBox spacing="15" alignment="center_right"
+          GridPane.columnIndex="0" GridPane.rowIndex="1">
+        <Button text="Where is the XML finding aid?"
+                onAction="#handleSelectXmlFindingAid"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="center_left"
+          GridPane.columnIndex="1" GridPane.rowIndex="1"
+          minWidth="300">
+        <Text fx:id="xmlFilename" text="No file selected"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="center_right"
+          GridPane.columnIndex="0" GridPane.rowIndex="2">
+        <Button text="Where should folders be built?"
+                onAction="#handleSelectContainerFolder"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="center_left"
+          GridPane.columnIndex="1" GridPane.rowIndex="2"
+          minWidth="300">
+        <Text fx:id="containerFoldername" text="No folder selected"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="bottom_right"
+          GridPane.columnIndex="1" GridPane.rowIndex="3">
+        <Button text="Build folders"
+                onAction="#handleProcessAction"/>
+          </HBox>
+
+    <Text fx:id="statusMessage"
+          GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+    <stylesheets>
+        <URL value="@gossamer.css" />
+    </stylesheets>
+</GridPane>
