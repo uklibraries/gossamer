@@ -23,8 +23,8 @@ import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public class EadFile {
-    public EadFile(File file, Text filenameText, Text statusText)
+class EadFile {
+    EadFile(File file, Text filenameText, Text statusText)
       throws BackingStoreException, IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         this.file = file;
         if (file.getName().indexOf(".") > 0) {
@@ -89,7 +89,7 @@ public class EadFile {
     // http://stackoverflow.com/a/2818246/237176
     //
     // Quoting http://www.roseindia.net/tutorials/xPath/java-xpath.shtml
-    public void buildDirectories()
+    void buildDirectories()
       throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
         if (file != null) {
             DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
@@ -167,7 +167,7 @@ public class EadFile {
                 .replaceAll("[^a-z0-9]", "_");
     }
 
-    public void setDirectory(File directory) {
+    void setDirectory(File directory) {
         this.directory = directory;
     }
 

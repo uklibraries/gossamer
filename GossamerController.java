@@ -53,6 +53,7 @@ public class GossamerController {
 
     @FXML protected void handleSelectContainerFolder(ActionEvent event) throws IOException {
         String home = FileSystemView.getFileSystemView().getHomeDirectory().toString();
+        String GOSSAMER_DIRECTORY_NODE = "gossamer/ui/prefs/Directory";
         String initialDirectory = prefs.get(
                 GOSSAMER_DIRECTORY_NODE,
                 home
@@ -79,7 +80,7 @@ public class GossamerController {
         }
     }
 
-    public void setStage(Stage primaryStage) {
+    void setStage(Stage primaryStage) {
         stage = primaryStage;
     }
     private Stage stage;
@@ -94,6 +95,5 @@ public class GossamerController {
     @FXML private Text statusMessage;
 
     private final String GOSSAMER_FILE_NODE = "gossamer/ui/prefs/File";
-    private final String GOSSAMER_DIRECTORY_NODE = "gossamer/ui/prefs/Directory";
     private Preferences prefs = Preferences.userRoot();
 }
