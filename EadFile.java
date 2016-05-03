@@ -142,10 +142,9 @@ class EadFile {
                             }
 
                             File subdir = new File(subdirBuilder.toString());
-                            if (subdir.mkdirs()) {
-                                updateProgress(i + 1, count);
-                                statusText.setText("Processed node " + i + " / " + count);
-                            }
+                            subdir.mkdirs();
+                            updateProgress(i + 1, count);
+                            statusText.setText("Processed node " + i + " / " + count);
                         }
                     }
                     return null;
