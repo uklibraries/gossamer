@@ -1,7 +1,10 @@
 package gossamer;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -21,8 +24,8 @@ public class GossamerController {
     @FXML protected void handleProcessAction(ActionEvent event)
       throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         statusMessage.setText("Building folders...");
-        eadFile.buildDirectories();
-        statusMessage.setText("Finished building folders");
+        progressBar.progressProperty().unbind();
+        eadFile.buildDirectories(progressBar);
     }
 
     @FXML protected void handleSelectXmlFindingAid(ActionEvent event)
@@ -83,6 +86,7 @@ public class GossamerController {
     void setStage(Stage primaryStage) {
         stage = primaryStage;
     }
+
     private Stage stage;
     final private FileChooser fileChooser = new FileChooser();
     final private DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -93,6 +97,7 @@ public class GossamerController {
     @FXML private Text xmlFilename;
     @FXML private Text containerFoldername;
     @FXML private Text statusMessage;
+    @FXML private final ProgressBar progressBar = new ProgressBar(0);
 
     private final String GOSSAMER_FILE_NODE = "gossamer/ui/prefs/File";
     private Preferences prefs = Preferences.userRoot();

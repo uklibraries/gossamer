@@ -49,6 +49,9 @@
     <Text fx:id="statusMessage"
           GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
+    <ProgressBar fx:id="progressBar"
+          GridPane.columnIndex="1" GridPane.rowIndex="5" visible="false"/>
+
     <stylesheets>
         <URL value="@gossamer.css" />
     </stylesheets>

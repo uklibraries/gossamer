@@ -1,5 +1,7 @@
 package gossamer;
 
+import javafx.concurrent.Task;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.text.Text;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -89,56 +91,78 @@ class EadFile {
     // http://stackoverflow.com/a/2818246/237176
     //
     // Quoting http://www.roseindia.net/tutorials/xPath/java-xpath.shtml
-    void buildDirectories()
+    void buildDirectories(final ProgressBar pb)
       throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
         if (file != null) {
             DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
             domFactory.setNamespaceAware(false);
             DocumentBuilder builder = domFactory.newDocumentBuilder();
             Document doc = builder.parse(file);
-            XPath xpath = XPathFactory.newInstance().newXPath();
+            final XPath xpath = XPathFactory.newInstance().newXPath();
             XPathExpression component_expr = getXpathForComponentWithContainers(xpath);
 
-            NodeList nodes = (NodeList)component_expr.evaluate(doc, XPathConstants.NODESET);
+            final NodeList nodes = (NodeList)component_expr.evaluate(doc, XPathConstants.NODESET);
             statusText.setText("Count: " + nodes.getLength());
-            for (int i = 0; i < nodes.getLength(); i += 1) {
-                Node n = nodes.item(i);
-                if (n != null && n.getNodeType() == Node.ELEMENT_NODE) {
-                    List<String> path_components = new LinkedList<String>();
-                    path_components.add(base);
-                    path_components.add(base);
-                    List<String> path_pieces = new LinkedList<String>();
-                    XPathExpression containers_expr = xpath.compile("did/container");
-                    NodeList containerList = (NodeList)containers_expr.evaluate(n, XPathConstants.NODESET);
-                    for (int j = 0; j < containerList.getLength(); j += 1) {
-                        Node container = containerList.item(j);
-                        if (container != null && container.getNodeType() == Node.ELEMENT_NODE) {
-                            path_pieces.add(normalizeString(container.getTextContent()));
-                            // bozo
-                            StringBuilder containerStringBuilder = new StringBuilder();
-                            containerStringBuilder.append(base);
-                            for (String path_piece : path_pieces) {
-                                containerStringBuilder.append("_").append(path_piece);
+            Task task = new Task<Void>() {
+                @Override protected Void call() throws Exception {
+                    final int count = nodes.getLength();
+                    for (int i = 0; i < count; i += 1) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        Node n = nodes.item(i);
+                        if (n != null && n.getNodeType() == Node.ELEMENT_NODE) {
+                            List<String> path_components = new LinkedList<String>();
+                            path_components.add(base);
+                            path_components.add(base);
+                            List<String> path_pieces = new LinkedList<String>();
+                            XPathExpression containers_expr = xpath.compile("did/container");
+                            NodeList containerList = (NodeList)containers_expr.evaluate(n, XPathConstants.NODESET);
+                            for (int j = 0; j < containerList.getLength(); j += 1) {
+                                Node container = containerList.item(j);
+                                if (container != null && container.getNodeType() == Node.ELEMENT_NODE) {
+                                    path_pieces.add(normalizeString(container.getTextContent()));
+                                    // bozo
+                                    StringBuilder containerStringBuilder = new StringBuilder();
+                                    containerStringBuilder.append(base);
+                                    for (String path_piece : path_pieces) {
+                                        containerStringBuilder.append("_").append(path_piece);
+                                    }
+                                    String path_block = containerStringBuilder.toString();
+                                    path_components.add(path_block);
+                                }
                             }
-                            String path_block = containerStringBuilder.toString();
-                            path_components.add(path_block);
-                        }
-                    }
-                    StringBuilder subdirBuilder = new StringBuilder();
-                    subdirBuilder.append(directory).append(File.separator);
-                    for (Iterator<String> path_iterator = path_components.iterator(); path_iterator.hasNext(); ) {
-                        subdirBuilder.append(path_iterator.next());
-                        if (path_iterator.hasNext()) {
-                            subdirBuilder.append(File.separator);
-                        }
-                    }
+                            StringBuilder subdirBuilder = new StringBuilder();
+                            subdirBuilder.append(directory).append(File.separator);
+                            for (Iterator<String> path_iterator = path_components.iterator(); path_iterator.hasNext(); ) {
+                                subdirBuilder.append(path_iterator.next());
+                                if (path_iterator.hasNext()) {
+                                    subdirBuilder.append(File.separator);
+                                }
+                            }
 
-                    File subdir = new File(subdirBuilder.toString());
-                    if (subdir.mkdirs()) {
-                        statusText.setText("Built " + subdir.getCanonicalPath());
+                            File subdir = new File(subdirBuilder.toString());
+                            if (subdir.mkdirs()) {
+                                updateProgress(i + 1, count);
+                                statusText.setText("Processed node " + i + " / " + count);
+                            }
+                        }
                     }
+                    return null;
+                };
+
+                @Override protected void succeeded() {
+                    super.succeeded();
+                    statusText.setText("Finished building folders");
+                    pb.setVisible(false);
                 }
-            }
+            };
+            pb.progressProperty().unbind();
+            pb.progressProperty().bind(task.progressProperty());
+            Thread th = new Thread(task);
+            th.setDaemon(true);
+            th.start();
+            pb.setVisible(true);
         }
     }
 
