@@ -1,8 +1,5 @@
 package gossamer;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.text.Text;
@@ -21,14 +18,14 @@ import java.util.prefs.Preferences;
 
 
 public class GossamerController {
-    @FXML protected void handleProcessAction(ActionEvent event)
+    @FXML protected void handleProcessAction()
       throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         statusMessage.setText("Building folders...");
         progressBar.progressProperty().unbind();
         eadFile.buildDirectories(progressBar);
     }
 
-    @FXML protected void handleSelectXmlFindingAid(ActionEvent event)
+    @FXML protected void handleSelectXmlFindingAid()
       throws BackingStoreException, IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         String home = FileSystemView.getFileSystemView().getHomeDirectory().toString();
         String initialDirectory = prefs.get(
@@ -54,7 +51,7 @@ public class GossamerController {
         }
     }
 
-    @FXML protected void handleSelectContainerFolder(ActionEvent event) throws IOException {
+    @FXML protected void handleSelectContainerFolder() throws IOException {
         String home = FileSystemView.getFileSystemView().getHomeDirectory().toString();
         String GOSSAMER_DIRECTORY_NODE = "gossamer/ui/prefs/Directory";
         String initialDirectory = prefs.get(

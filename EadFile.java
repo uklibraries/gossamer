@@ -4,6 +4,7 @@ import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.text.Text;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -37,21 +38,10 @@ class EadFile {
         }
         this.filenameText = filenameText;
         this.statusText = statusText;
-        valid = false;
         update();
     }
 
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file)
-      throws BackingStoreException, IOException, ParserConfigurationException, SAXException, XPathExpressionException {
-        this.file = file;
-        update();
-    }
-
-    protected void update()
+    private void update()
       throws BackingStoreException, IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         if (file != null) {
             String GOSSAMER_FILE_NODE = "gossamer/ui/prefs/File";
@@ -69,7 +59,7 @@ class EadFile {
 
     // Example from StackOverflow by user McDowell
     // http://stackoverflow.com/a/16054/237176
-    protected void validate() throws IOException, SAXException {
+    private void validate() throws IOException, SAXException {
         statusText.setText("Validating XML finding aid");
         URL schemaFile = new URL("http://www.loc.gov/ead/ead.xsd");
         Source xmlFile= new StreamSource(file);
@@ -79,18 +69,16 @@ class EadFile {
         Validator validator = schema.newValidator();
         try {
             validator.validate(xmlFile);
-            valid = true;
             statusText.setText("");
         } catch (SAXException e) {
-            valid = false;
             statusText.setText("Invalid XML finding aid");
         }
     }
 
-    // XPath example from StackOverflow by user ripper234
-    // http://stackoverflow.com/a/2818246/237176
-    //
-    // Quoting http://www.roseindia.net/tutorials/xPath/java-xpath.shtml
+    // The original version of buildDirectories() used a StackOverflow post by user ripper234
+    // (http://stackoverflow.com/a/2818246/237176) as partial documentation for XPath.  That user
+    // was in turn quoting http://www.roseindia.net/tutorials/xPath/java-xpath.shtml .  The code
+    // has been pretty heavily modified since then.
     void buildDirectories(final ProgressBar pb)
       throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
         if (file != null) {
@@ -112,37 +100,107 @@ class EadFile {
                         }
                         Node n = nodes.item(i);
                         if (n != null && n.getNodeType() == Node.ELEMENT_NODE) {
-                            List<String> path_components = new LinkedList<String>();
-                            path_components.add(base);
-                            path_components.add(base);
-                            List<String> path_pieces = new LinkedList<String>();
-                            XPathExpression containers_expr = xpath.compile("did/container");
+                            Queue<String> directory_creation_queue;
+                            final XPathExpression containers_expr = xpath.compile("did/container");
                             NodeList containerList = (NodeList)containers_expr.evaluate(n, XPathConstants.NODESET);
+
+                            boolean hasParentAttribute = false;
                             for (int j = 0; j < containerList.getLength(); j += 1) {
                                 Node container = containerList.item(j);
                                 if (container != null && container.getNodeType() == Node.ELEMENT_NODE) {
-                                    path_pieces.add(normalizeString(container.getTextContent()));
-                                    // bozo
-                                    StringBuilder containerStringBuilder = new StringBuilder();
-                                    containerStringBuilder.append(base);
-                                    for (String path_piece : path_pieces) {
-                                        containerStringBuilder.append("_").append(path_piece);
+                                    NamedNodeMap attributes = container.getAttributes();
+                                    if (attributes.getNamedItem("parent") != null) {
+                                        hasParentAttribute = true;
+                                        break;
                                     }
-                                    String path_block = containerStringBuilder.toString();
-                                    path_components.add(path_block);
-                                }
-                            }
-                            StringBuilder subdirBuilder = new StringBuilder();
-                            subdirBuilder.append(directory).append(File.separator);
-                            for (Iterator<String> path_iterator = path_components.iterator(); path_iterator.hasNext(); ) {
-                                subdirBuilder.append(path_iterator.next());
-                                if (path_iterator.hasNext()) {
-                                    subdirBuilder.append(File.separator);
                                 }
                             }
 
-                            File subdir = new File(subdirBuilder.toString());
-                            subdir.mkdirs();
+                            class DirectoryQueueBuilder {
+                                private Queue<String> directory_queue;
+                                private Queue<String> current_directory;
+                                private String base;
+                                private boolean simple;
+                                private boolean finalized = false;
+
+                                private DirectoryQueueBuilder(String base, boolean hasParentAttribute) {
+                                    this.base = base;
+                                    simple = hasParentAttribute;
+                                    directory_queue = new LinkedList<String>();
+                                    current_directory = new LinkedList<String>();
+                                }
+
+                                private Queue<String> getDirectoryQueue() {
+                                    if (!finalized) {
+                                        finalized = true;
+                                        processCurrentDirectory();
+                                    }
+                                    return directory_queue;
+                                }
+
+                                private void insert(Node container) {
+                                    if (!simple) {
+                                        NamedNodeMap attributes = container.getAttributes();
+                                        String parent_id = attributes.getNamedItem("parent").getTextContent().trim();
+                                        if (parent_id.equals("")) {
+                                            processCurrentDirectory();
+                                        }
+                                    }
+                                    current_directory.add(renderContainer(container));
+                                }
+
+                                private void processCurrentDirectory() {
+                                    if (current_directory.isEmpty()) {
+                                        return;
+                                    }
+                                    StringBuilder sb = new StringBuilder();
+                                    sb.append(directory).append(File.separator);
+                                    sb.append(base).append(File.separator);
+                                    sb.append(base).append(File.separator);
+                                    while (!current_directory.isEmpty()) {
+                                        String dir = current_directory.remove();
+                                        sb.append(dir);
+                                        if (current_directory.peek() != null) {
+                                            sb.append(File.separator);
+                                        }
+                                    }
+                                    directory_queue.add(sb.toString());
+                                }
+
+                                private String renderContainer(Node container) {
+                                    NamedNodeMap attributes = container.getAttributes();
+                                    String container_type = "container";
+                                    String container_number = container.getTextContent().trim();
+                                    String raw_type = normalizeString(attributes.getNamedItem("type").getTextContent());
+                                    if (raw_type.length() > 0) {
+                                        if (raw_type.equals("othertype")) {
+                                            String raw_label = normalizeString(attributes.getNamedItem("label").getTextContent());
+                                            if (raw_label.length() > 0) {
+                                                container_type = raw_label;
+                                            }
+                                        } else {
+                                            container_type = raw_type;
+                                        }
+                                    }
+                                    // https://gist.github.com/jimjam88/8559505
+                                    container_type = Character.toUpperCase(container_type.charAt(0)) + container_type.substring(1);
+                                    return container_type + "_" + container_number;
+                                }
+                            }
+
+                            DirectoryQueueBuilder qb = new DirectoryQueueBuilder(base, hasParentAttribute);
+
+                            for (int j = 0; j < containerList.getLength(); j += 1) {
+                                qb.insert(containerList.item(j));
+                            }
+
+                            directory_creation_queue = qb.getDirectoryQueue();
+
+                            while (directory_creation_queue.peek() != null) {
+                                File subdir = new File(directory_creation_queue.remove());
+                                subdir.mkdirs();
+                            }
+
                             updateProgress(i + 1, count);
                             statusText.setText("Processed node " + i + " / " + count);
                         }
@@ -201,5 +259,4 @@ class EadFile {
     private Text statusText;
 
     private Preferences prefs = Preferences.userRoot();
-    private boolean valid;
 }

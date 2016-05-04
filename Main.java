@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(final Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("gossamer.fxml"));
         Parent root = (Parent)loader.load();
-        GossamerController controller = (GossamerController)loader.getController();
+        GossamerController controller = loader.getController();
         controller.setStage(primaryStage);
 
         Scene scene = new Scene(root, 600, 275);
