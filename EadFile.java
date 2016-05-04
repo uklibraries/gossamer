@@ -1,5 +1,6 @@
 package gossamer;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.text.Text;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.RunnableFuture;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -95,6 +97,7 @@ class EadFile {
                 @Override protected Void call() throws Exception {
                     final int count = nodes.getLength();
                     for (int i = 0; i < count; i += 1) {
+                        final int counter = i + 1;
                         if (isCancelled()) {
                             break;
                         }
@@ -198,11 +201,15 @@ class EadFile {
 
                             while (directory_creation_queue.peek() != null) {
                                 File subdir = new File(directory_creation_queue.remove());
-                                subdir.mkdirs();
+                                if (!subdir.exists()) {
+                                    subdir.mkdirs();
+                                }
                             }
 
-                            updateProgress(i + 1, count);
-                            statusText.setText("Processed node " + i + " / " + count);
+                            updateProgress(counter, count);
+                            Platform.runLater(() -> {
+                                statusText.setText("Processed component " + (counter - 1) + " / " + count);
+                            });
                         }
                     }
                     return null;

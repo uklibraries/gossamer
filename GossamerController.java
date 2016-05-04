@@ -21,7 +21,7 @@ public class GossamerController {
     @FXML protected void handleProcessAction()
       throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         statusMessage.setText("Building folders...");
-        progressBar.progressProperty().unbind();
+        progressBar.setVisible(true);
         eadFile.buildDirectories(progressBar);
     }
 
