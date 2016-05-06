@@ -94,7 +94,7 @@ public class GossamerController {
     @FXML private Text xmlFilename;
     @FXML private Text containerFoldername;
     @FXML private Text statusMessage;
-    @FXML private final ProgressBar progressBar = new ProgressBar(0);
+    @FXML private ProgressBar progressBar;
 
     private final String GOSSAMER_FILE_NODE = "gossamer/ui/prefs/File";
     private Preferences prefs = Preferences.userRoot();
