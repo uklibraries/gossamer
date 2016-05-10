@@ -144,8 +144,8 @@ class EadFile {
                                 private void insert(Node container) {
                                     if (!simple) {
                                         NamedNodeMap attributes = container.getAttributes();
-                                        String parent_id = attributes.getNamedItem("parent").getTextContent().trim();
-                                        if (parent_id.equals("")) {
+                                        Node parent_id = attributes.getNamedItem("parent");
+                                        if (parent_id != null) {
                                             processCurrentDirectory();
                                         }
                                     }
