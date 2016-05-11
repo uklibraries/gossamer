@@ -11,7 +11,7 @@ public class Main extends Application {
     @Override
     public void start(final Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("gossamer.fxml"));
-        Parent root = (Parent)loader.load();
+        Parent root = loader.load();
         GossamerController controller = loader.getController();
         controller.setStage(primaryStage);
 

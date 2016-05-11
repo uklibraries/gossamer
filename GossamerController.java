@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 
 import javax.swing.filechooser.FileSystemView;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.prefs.Preferences;
 
 public class GossamerController {
     @FXML protected void handleProcessAction()
-      throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+      throws IOException, ParserConfigurationException, SAXException, XPathExpressionException, TransformerException {
         statusMessage.setText("Building folders...");
         progressBar.setVisible(true);
         eadFile.buildDirectories(progressBar);
