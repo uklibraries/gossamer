@@ -283,6 +283,10 @@ class EadFile {
                     dc_creator.setTextContent(creator);
                     dublin_core.appendChild(dc_creator);
 
+                    Element dc_identifier = doc.createElement("dc:identifier");
+                    dc_identifier.setTextContent(accession_number);
+                    dublin_core.appendChild(dc_identifier);
+
                     for (String subject : subjects) {
                         Element dc_subject = doc.createElement("dc:subject");
                         dc_subject.setTextContent(subject);
