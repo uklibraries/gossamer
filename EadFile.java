@@ -382,6 +382,28 @@ class EadFile {
                     }
                 }
 
+                /* Files */
+                {
+                    Element fileSec = doc.createElementNS(mets, "mets:fileSec");
+                    rootNode.appendChild(fileSec);
+
+                    Element fileGrp = doc.createElementNS(mets, "mets:fileGrp");
+                    fileGrp.setAttribute("ID", "FileGrpFindingAid");
+                    fileGrp.setAttribute("USE", "Finding Aid");
+                    fileSec.appendChild(fileGrp);
+
+                    Element fileElt = doc.createElementNS(mets, "mets:file");
+                    fileElt.setAttribute("ID", "MasterFindingAid");
+                    fileElt.setAttribute("USE", "master");
+                    fileElt.setAttribute("MIMETYPE", "application/xml");
+                    fileGrp.appendChild(fileElt);
+
+                    Element flocat = doc.createElementNS(mets, "mets:FLocat");
+                    flocat.setAttribute("xlink:href", file.getName());
+                    flocat.setAttribute("LOCTYPE", "OTHER");
+                    fileElt.appendChild(flocat);
+                }
+
                 return doc;
             }
         }
