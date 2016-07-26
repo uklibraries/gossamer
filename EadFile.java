@@ -60,8 +60,8 @@ class EadFile {
     // http://stackoverflow.com/a/16054/237176
     private void validate() throws IOException, SAXException {
         statusText.setText("Validating XML finding aid");
-        URL schemaFile = new URL("http://www.loc.gov/ead/ead.xsd");
-        Source xmlFile= new StreamSource(file);
+        URL schemaFile = new URL("https://nyx.uky.edu/ead/ead.xsd");
+        Source xmlFile = new StreamSource(file);
         SchemaFactory schemaFactory = SchemaFactory
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(schemaFile);
