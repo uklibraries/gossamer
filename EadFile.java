@@ -519,7 +519,7 @@ class EadFile {
                                     sb.append(base).append(File.separator);
                                     sb.append(base).append(File.separator);
                                     while (!current_directory.isEmpty()) {
-                                        String dir = current_directory.remove();
+                                        String dir = current_directory.remove().trim().replaceAll("[^A-Za-z0-9]", "_");
                                         sb.append(dir);
                                         if (current_directory.peek() != null) {
                                             sb.append(File.separator);
