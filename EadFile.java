@@ -519,8 +519,8 @@ class EadFile {
                                     sb.append(base).append(File.separator);
                                     sb.append(base).append(File.separator);
                                     while (!current_directory.isEmpty()) {
-                                        String dir = current_directory.remove().trim().replaceAll("[^A-Za-z0-9]", "_");
-                                        sb.append(dir);
+                                        String dir = current_directory.remove();
+                                        sb.append(normalizeDirectory(dir));
                                         if (current_directory.peek() != null) {
                                             sb.append(File.separator);
                                         }
@@ -605,6 +605,10 @@ class EadFile {
         String isaComponentWithContainers = sb.toString();
 
         return xpath.compile(isaComponentWithContainers);
+    }
+
+    private String normalizeDirectory(String string) {
+        return Character.toUpperCase(string.charAt(0)) + normalizeString(string.substring(1));
     }
 
     private String normalizeString(String string) {
